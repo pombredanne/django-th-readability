@@ -1,0 +1,4 @@
+exclude th_readability/local_settings.py
+include *.txt *.rst
+recursive-include th_readability *.html
+recursive-include th_readability/templates *

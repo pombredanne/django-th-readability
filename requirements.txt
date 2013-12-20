@@ -1,0 +1,2 @@
+django_th==0.8.1
+readability-api==0.2.2
