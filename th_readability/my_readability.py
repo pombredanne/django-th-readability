@@ -8,6 +8,11 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils.log import getLogger
 
+# oauth and url stuff
+import oauth2 as oauth
+import urlparse
+import urllib
+
 # add the python API here if needed
 from readability import ReaderClient
 
@@ -27,6 +32,13 @@ logger = getLogger('django_th.trigger_happy')
 
 class ServiceReadability(ServicesMgr):
 
+    def __init__(self):
+        self.AUTH_URL = 'https://www.readability.com/api/rest/v1/oauth/authorize/'
+        self.REQ_TOKEN = 'https://www.readability.com/api/rest/v1/oauth/request_token/'
+        self.ACC_TOKEN = 'https://www.readability.com/api/rest/v1/oauth/access_token/'
+        self.consummer_key = settings.TH_READABILITY['consummer_key']
+        self.consummer_secret = settings.TH_READABILITY['consummer_secretr']
+
     def process_data(self, token, trigger_id, date_triggered):
         """
             get the data from the service
@@ -43,18 +55,20 @@ class ServiceReadability(ServicesMgr):
         if token and 'link' in data and data['link'] is not None and len(data['link']) > 0:
             # get the data of this trigger
             trigger = readability.objects.get(trigger_id=trigger_id)
-
-            # get the token of the external service for example
-            readability_instance = ReaderClient(
-                settings.TH_READABILITY['consummer_key'], token)
+            token_key, token_secret = token.split('#TH#')
+            readability_instance = ReaderClient(self.consummer_key,
+                                                self.consummer_secret,
+                                                token_key,
+                                                token_secret)
 
             title = ''
             title = (data['title'] if 'title' in data else '')
             # add data to the external service
-            item_id = readability_instance .add(
+            item_id = readability_instance.add(
                 url=data['link'], title=title, tags=(trigger.tag.lower()))
 
-            sentance = str('readability {} created').format(data['link'])
+            sentance = str('readability {} created item id {}').format(
+                data['link'], item_id)
             logger.debug(sentance)
         else:
             logger.critical("no token provided for trigger ID %s ", trigger_id)
@@ -63,19 +77,18 @@ class ServiceReadability(ServicesMgr):
         """
             let's auth the user to the Service
         """
+
         callbackUrl = 'http://%s%s' % (
             request.get_host(), reverse('dummy_callback'))
-
-        request_token = CallOfApi.get_request_token(
-            consumer_key=settings.TH_READABILITY['consummer_key'],
-            redirect_uri=callbackUrl)
+        request_token = self.get_request_token(request, callbackUrl)
 
         # Save the request token information for later
-        request.session['request_token'] = request_token
+        request.session['oauth_token'] = request_token['oauth_token']
+        request.session['oauth_token_secret'] = request_token[
+            'oauth_token_secret']
 
         # URL to redirect user to, to authorize your app
-        auth_url = CallOfApi.get_auth_url(
-            code=request_token, redirect_uri=callbackUrl)
+        auth_url = self.get_auth_url(request, request_token)
 
         return auth_url
 
@@ -92,11 +105,13 @@ class ServiceReadability(ServicesMgr):
             # 1) we get the previous objet
             us = UserService.objects.get(
                 user=request.user,
-                name=ServicesActivated.objects.get(name='Servicereadability'))
-            # 2) then get the token
-            access_token = CallOfApi.get_access_token(
-                consumer_key=settings.TH_READABILITY['consummer_key'],
-                code=request.session['request_token'])
+                name=ServicesActivated.objects.get(name='ServiceReadability'))
+            # 2) Readability API require to use 4 parms consummer_key/secret + token_key/secret
+            # instead of usually get just the token from an access_token
+            # request. So we need to add a string seperator for later use to
+            # slpit on this one
+            access_token = request.session[
+                'oauth_token'] + '#TH#' + request.session['oauth_token_secret'],
 
             us.token = access_token
             # 3) and save everything
@@ -105,3 +120,18 @@ class ServiceReadability(ServicesMgr):
             return '/'
 
         return 'readability/callback.html'
+
+    # Oauth Stuff
+    def get_auth_url(self, request, request_token):
+        return '%s?oauth_token=%s' % (
+            self.AUTH_URL,
+            urllib.quote(request_token['oauth_token']))
+
+    def get_request_token(self, request, callback_url):
+        client = oauth.Consumer(self.consumer_key, self.consumer_secret)
+        request_url = '%s?oauth_callback=%s' % (
+            self.REQ_TOKEN, urllib.quote(callback_url))
+
+        resp, content = client.request(request_url, 'GET')
+        request_token = dict(urlparse.parse_qsl(content))
+        return request_token
