@@ -12,6 +12,7 @@ from django.utils.log import getLogger
 import oauth2 as oauth
 import urlparse
 import urllib
+# import arrow
 
 # add the python API here if needed
 from readability import ReaderClient
@@ -37,14 +38,31 @@ class ServiceReadability(ServicesMgr):
         self.REQ_TOKEN = 'https://www.readability.com/api/rest/v1/oauth/request_token/'
         self.ACC_TOKEN = 'https://www.readability.com/api/rest/v1/oauth/access_token/'
         self.consummer_key = settings.TH_READABILITY['consummer_key']
-        self.consummer_secret = settings.TH_READABILITY['consummer_secretr']
+        self.consummer_secret = settings.TH_READABILITY['consummer_secret']
 
     def process_data(self, token, trigger_id, date_triggered):
         """
             get the data from the service
         """
-        datas = list()
-        return datas
+        data = []
+
+        if token is not None:
+            token_key, token_secret = token.split('#TH#')
+
+            client = ReaderClient(self.consummer_key, self.consummer_secret,
+                                  token_key, token_secret)
+
+            date_triggered = '20130101 00:00:00'  # for test purpose
+            bookmarks = client.get_bookmarks(added_since=date_triggered)
+
+            for bookmark in bookmarks:
+
+                data.append(
+                    {'title': bookmark.article.title,
+                     'link': bookmark.article.link,
+                     'content': bookmark.article.excerpt})
+
+        return data
 
     def save_data(self, token, trigger_id, **data):
         """
@@ -79,7 +97,7 @@ class ServiceReadability(ServicesMgr):
         """
 
         callbackUrl = 'http://%s%s' % (
-            request.get_host(), reverse('dummy_callback'))
+            request.get_host(), reverse('readability_callback'))
         request_token = self.get_request_token(request, callbackUrl)
 
         # Save the request token information for later
@@ -111,7 +129,7 @@ class ServiceReadability(ServicesMgr):
             # request. So we need to add a string seperator for later use to
             # slpit on this one
             access_token = request.session[
-                'oauth_token'] + '#TH#' + request.session['oauth_token_secret'],
+                'oauth_token'] + '#TH#' + request.session['oauth_token_secret']
 
             us.token = access_token
             # 3) and save everything
@@ -128,7 +146,10 @@ class ServiceReadability(ServicesMgr):
             urllib.quote(request_token['oauth_token']))
 
     def get_request_token(self, request, callback_url):
-        client = oauth.Consumer(self.consumer_key, self.consumer_secret)
+        consummer = oauth.Consumer(self.consummer_key, self.consummer_secret)
+
+        client = oauth.Client(consummer)
+
         request_url = '%s?oauth_callback=%s' % (
             self.REQ_TOKEN, urllib.quote(callback_url))
 

@@ -9,6 +9,7 @@ class Readability(Services):
     # put whatever you need  here
 
     # but keep at least this one
+    tag = models.CharField(max_length=80, blank=True)
     trigger = models.ForeignKey('TriggerService')
 
     class Meta:
