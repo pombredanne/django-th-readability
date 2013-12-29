@@ -1,22 +1,21 @@
 # -*- coding: utf-8 -*-
+# oauth and url stuff
+import oauth2 as oauth
+import urlparse
+import urllib
+# add the python API here if needed
+from readability import ReaderClient
 
-# django_th classes
-from django_th.services.services import ServicesMgr
-from django_th.models import UserService, ServicesActivated
 # django classes
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils.log import getLogger
 
-# oauth and url stuff
-import oauth2 as oauth
-import urlparse
-import urllib
-# import arrow
+# django_th classes
+from django_th.services.services import ServicesMgr
+from django_th.models import UserService, ServicesActivated
 
-# add the python API here if needed
-from readability import ReaderClient
-
+from th_readability.models import Readability
 """
     handle process with readability
     put the following in settings.py
@@ -52,7 +51,6 @@ class ServiceReadability(ServicesMgr):
             client = ReaderClient(self.consummer_key, self.consummer_secret,
                                   token_key, token_secret)
 
-            date_triggered = '20130101 00:00:00'  # for test purpose
             bookmarks = client.get_bookmarks(added_since=date_triggered)
 
             for bookmark in bookmarks:
@@ -68,28 +66,29 @@ class ServiceReadability(ServicesMgr):
         """
             let's save the data
         """
-        from th_readability.models import readability
-
         if token and 'link' in data and data['link'] is not None and len(data['link']) > 0:
             # get the data of this trigger
-            trigger = readability.objects.get(trigger_id=trigger_id)
+            trigger = Readability.objects.get(trigger_id=trigger_id)
             token_key, token_secret = token.split('#TH#')
             readability_instance = ReaderClient(self.consummer_key,
                                                 self.consummer_secret,
                                                 token_key,
                                                 token_secret)
 
-            title = ''
-            title = (data['title'] if 'title' in data else '')
-            # add data to the external service
-            item_id = readability_instance.add(
-                url=data['link'], title=title, tags=(trigger.tag.lower()))
+            bookmark_id = readability_instance.add_bookmark(url=data['link'])
+
+            print "BOOKMARK ID ", bookmark_id
+
+            if trigger.tag is not None and len(trigger.tag) > 0:
+                readability_instance.add_tags_to_bookmark(
+                    bookmark_id, tags=(trigger.tag.lower()))
 
             sentance = str('readability {} created item id {}').format(
-                data['link'], item_id)
+                data['link'], bookmark_id)
             logger.debug(sentance)
         else:
-            logger.critical("no token provided for trigger ID %s ", trigger_id)
+            logger.critical(
+                "no token or link provided for trigger ID {} ".format(trigger_id))
 
     def auth(self, request):
         """
@@ -146,13 +145,18 @@ class ServiceReadability(ServicesMgr):
             urllib.quote(request_token['oauth_token']))
 
     def get_request_token(self, request, callback_url):
-        consummer = oauth.Consumer(self.consummer_key, self.consummer_secret)
-
-        client = oauth.Client(consummer)
-
+        client = self._get_oauth_client()
         request_url = '%s?oauth_callback=%s' % (
             self.REQ_TOKEN, urllib.quote(callback_url))
 
         resp, content = client.request(request_url, 'GET')
         request_token = dict(urlparse.parse_qsl(content))
         return request_token
+
+    def _get_oauth_client(self, token=None):
+        consumer = oauth.Consumer(self.consumer_key, self.consumer_secret)
+        if token:
+            client = oauth.Client(consumer, token)
+        else:
+            client = oauth.Client(consumer)
+        return client
