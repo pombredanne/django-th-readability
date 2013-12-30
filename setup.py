@@ -16,7 +16,8 @@ install_requires = reqs('requirements.txt')
 setup(
     name='django_th_readability',
     version=version,
-    description='Django Trigger Happy : This handles your data from/to your readability account',
+    description='Django Trigger Happy : Service Readability to read and add\
+ data in your readability account from and to the service of your choice',
     author='Olivier Demah',
     author_email='olivier@foxmask.info',
     url='https://github.com/foxmask/django-th-readability',

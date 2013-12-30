@@ -2,13 +2,11 @@
 Django Trigger Happy : Readability Service
 ==========================================
 
-This project is a readability module for Django Trigger Happy 
-that will handle the data from/to your readability account
-
+This service provides an access to your Readability account from Trigger Happy
 
 Requirements :
 ==============
-* django_th: 0.8.1
+* django_th: 0.8.2
 * readability-api: 0.2.2
 
 
@@ -56,7 +54,7 @@ TH_SERVICES is a list of the services use by Trigger Happy
 .. code:: python
 
     TH_SERVICES = (
-        'th_readability.my_readability.Servicereadability',
+        'th_readability.my_readability.ServiceReadability',
     )
 
 TH_READABILITY
