@@ -53,17 +53,27 @@ class ServiceReadability(ServicesMgr):
 
             bookmarks = client.get_bookmarks(
                 added_since=date_triggered).content
+
             for bookmark in bookmarks.values():
+
                 for b in bookmark:
-                    title = ''
-                    if 'title' in b['article']:
-                        title = b['article']['title']
-                    link = b['article']['url']
-                    content = b['article']['excerpt']
-                    data.append(
-                        {'title': title,
-                         'link': link,
-                         'content': content})
+                    if 'article' in b:
+                        title = ''
+                        if 'title' in b['article']:
+                            title = b['article']['title']
+
+                        link = ''
+                        if 'url' in b['article']:
+                            link = b['article']['url']
+
+                        content = ''
+                        if 'excerpt' in b['article']:
+                            content = b['article']['excerpt']
+
+                        data.append(
+                            {'title': title,
+                             'link': link,
+                             'content': content})
 
         return data
 
