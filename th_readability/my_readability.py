@@ -48,17 +48,22 @@ class ServiceReadability(ServicesMgr):
         if token is not None:
             token_key, token_secret = token.split('#TH#')
 
-            client = ReaderClient(self.consummer_key, self.consummer_secret,
-                                  token_key, token_secret)
+            client = ReaderClient(
+                self.consummer_key, self.consummer_secret, token_key, token_secret)
 
-            bookmarks = client.get_bookmarks(added_since=date_triggered)
-
-            for bookmark in bookmarks:
-
-                data.append(
-                    {'title': bookmark.article.title,
-                     'link': bookmark.article.link,
-                     'content': bookmark.article.excerpt})
+            bookmarks = client.get_bookmarks(
+                added_since=date_triggered).content
+            for bookmark in bookmarks.values():
+                for b in bookmark:
+                    title = ''
+                    if 'title' in b['article']:
+                        title = b['article']['title']
+                    link = b['article']['url']
+                    content = b['article']['excerpt']
+                    data.append(
+                        {'title': title,
+                         'link': link,
+                         'content': content})
 
         return data
 
@@ -76,8 +81,6 @@ class ServiceReadability(ServicesMgr):
                                                 token_secret)
 
             bookmark_id = readability_instance.add_bookmark(url=data['link'])
-
-            print "BOOKMARK ID ", bookmark_id
 
             if trigger.tag is not None and len(trigger.tag) > 0:
                 readability_instance.add_tags_to_bookmark(
@@ -127,10 +130,14 @@ class ServiceReadability(ServicesMgr):
             # instead of usually get just the token from an access_token
             # request. So we need to add a string seperator for later use to
             # slpit on this one
-            access_token = request.session[
-                'oauth_token'] + '#TH#' + request.session['oauth_token_secret']
+            access_token = self.get_access_token(
+                request.session['oauth_token'],
+                request.session['oauth_token_secret'],
+                request.GET.get('oauth_verifier', '')
+            )
+            us.token = access_token['oauth_token'] + \
+                '#TH#' + access_token['oauth_token_secret']
 
-            us.token = access_token
             # 3) and save everything
             us.save()
         except KeyError:
@@ -153,8 +160,19 @@ class ServiceReadability(ServicesMgr):
         request_token = dict(urlparse.parse_qsl(content))
         return request_token
 
+    def get_access_token(
+        self, oauth_token, oauth_token_secret, oauth_verifier
+    ):
+        token = oauth.Token(oauth_token, oauth_token_secret)
+        token.set_verifier(oauth_verifier)
+        client = self._get_oauth_client(token)
+
+        resp, content = client.request(self.ACC_TOKEN, 'POST')
+        access_token = dict(urlparse.parse_qsl(content))
+        return access_token
+
     def _get_oauth_client(self, token=None):
-        consumer = oauth.Consumer(self.consumer_key, self.consumer_secret)
+        consumer = oauth.Consumer(self.consummer_key, self.consummer_secret)
         if token:
             client = oauth.Client(consumer, token)
         else:
