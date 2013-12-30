@@ -66,7 +66,8 @@ TH_READABILITY is the settings you will need to be able to add/read data in/from
 .. code:: python
 
     TH_READABILITY = {
-        'consumer_key': 'abcdefghijklmnopqrstuvwxyz',
+        'consummer_key': 'abcdefghijklmnopqrstuvwxyz',
+        'consummer_secret': 'abcdefghijklmnopqrstuvwxyz',
     }
 
 Setting up : Administration
