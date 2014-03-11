@@ -11,6 +11,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils.log import getLogger
 
+
 # django_th classes
 from django_th.services.services import ServicesMgr
 from django_th.models import UserService, ServicesActivated
@@ -21,8 +22,8 @@ from th_readability.models import Readability
     put the following in settings.py
 
     TH_READABILITY = {
-        'consummer_key': 'abcdefghijklmnopqrstuvwxyz',
-        'consummer_secret': 'abcdefghijklmnopqrstuvwxyz',
+        'consumer_key': 'abcdefghijklmnopqrstuvwxyz',
+        'consumer_secret': 'abcdefghijklmnopqrstuvwxyz',
     }
 
 """
@@ -36,8 +37,8 @@ class ServiceReadability(ServicesMgr):
         self.AUTH_URL = 'https://www.readability.com/api/rest/v1/oauth/authorize/'
         self.REQ_TOKEN = 'https://www.readability.com/api/rest/v1/oauth/request_token/'
         self.ACC_TOKEN = 'https://www.readability.com/api/rest/v1/oauth/access_token/'
-        self.consummer_key = settings.TH_READABILITY['consummer_key']
-        self.consummer_secret = settings.TH_READABILITY['consummer_secret']
+        self.consumer_key = settings.TH_READABILITY['consumer_key']
+        self.consumer_secret = settings.TH_READABILITY['consumer_secret']
 
     def process_data(self, token, trigger_id, date_triggered):
         """
@@ -49,7 +50,7 @@ class ServiceReadability(ServicesMgr):
             token_key, token_secret = token.split('#TH#')
 
             client = ReaderClient(
-                self.consummer_key, self.consummer_secret, token_key, token_secret)
+                self.consumer_key, self.consumer_secret, token_key, token_secret)
 
             bookmarks = client.get_bookmarks(
                 added_since=date_triggered).content
@@ -85,8 +86,8 @@ class ServiceReadability(ServicesMgr):
             # get the data of this trigger
             trigger = Readability.objects.get(trigger_id=trigger_id)
             token_key, token_secret = token.split('#TH#')
-            readability_instance = ReaderClient(self.consummer_key,
-                                                self.consummer_secret,
+            readability_instance = ReaderClient(self.consumer_key,
+                                                self.consumer_secret,
                                                 token_key,
                                                 token_secret)
 
@@ -136,7 +137,7 @@ class ServiceReadability(ServicesMgr):
             us = UserService.objects.get(
                 user=request.user,
                 name=ServicesActivated.objects.get(name='ServiceReadability'))
-            # 2) Readability API require to use 4 parms consummer_key/secret + token_key/secret
+            # 2) Readability API require to use 4 parms consumer_key/secret + token_key/secret
             # instead of usually get just the token from an access_token
             # request. So we need to add a string seperator for later use to
             # slpit on this one
@@ -182,7 +183,7 @@ class ServiceReadability(ServicesMgr):
         return access_token
 
     def _get_oauth_client(self, token=None):
-        consumer = oauth.Consumer(self.consummer_key, self.consummer_secret)
+        consumer = oauth.Consumer(self.consumer_key, self.consumer_secret)
         if token:
             client = oauth.Client(consumer, token)
         else:

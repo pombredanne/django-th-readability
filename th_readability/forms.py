@@ -19,5 +19,5 @@ class ReadabilityProviderForm(ReadabilityForm):
     pass
 
 
-class ReadabilityConsummerForm(ReadabilityForm):
+class ReadabilityConsumerForm(ReadabilityForm):
     pass

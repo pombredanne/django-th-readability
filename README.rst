@@ -6,7 +6,7 @@ This service provides an access to your Readability account from Trigger Happy
 
 Requirements :
 ==============
-* django_th: 0.8.2
+* django_th: 0.8.3
 * readability-api: 0.2.2
 
 
@@ -64,8 +64,8 @@ TH_READABILITY is the settings you will need to be able to add/read data in/from
 .. code:: python
 
     TH_READABILITY = {
-        'consummer_key': 'abcdefghijklmnopqrstuvwxyz',
-        'consummer_secret': 'abcdefghijklmnopqrstuvwxyz',
+        'consumer_key': 'abcdefghijklmnopqrstuvwxyz',
+        'consumer_secret': 'abcdefghijklmnopqrstuvwxyz',
     }
 
 Setting up : Administration
