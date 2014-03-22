@@ -6,7 +6,7 @@ This service provides an access to your Readability account from Trigger Happy
 
 Requirements :
 ==============
-* django_th: 0.8.3
+* django_th: 0.9.0
 * readability-api: 0.2.2
 
 
