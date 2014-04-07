@@ -1,22 +1,21 @@
 # -*- coding: utf-8 -*-
 # oauth and url stuff
-import oauth2 as oauth
-import urlparse
+import oauthlib as oauth
 import urllib
-# add the python API here if needed
-from readability import ReaderClient
+from urllib.parse import urlparse
+# readability API
+from readability_api import ReaderClient
 
 # django classes
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils.log import getLogger
 
-
 # django_th classes
 from django_th.services.services import ServicesMgr
 from django_th.models import UserService, ServicesActivated
-
 from th_readability.models import Readability
+
 """
     handle process with readability
     put the following in settings.py
@@ -26,6 +25,12 @@ from th_readability.models import Readability
         'consumer_secret': 'abcdefghijklmnopqrstuvwxyz',
     }
 
+    TH_SERVICES = (
+        ...
+        'th_readability.my_readability.ServiceReadability',
+        ...
+    )
+
 """
 
 logger = getLogger('django_th.trigger_happy')
@@ -34,9 +39,10 @@ logger = getLogger('django_th.trigger_happy')
 class ServiceReadability(ServicesMgr):
 
     def __init__(self):
-        self.AUTH_URL = 'https://www.readability.com/api/rest/v1/oauth/authorize/'
-        self.REQ_TOKEN = 'https://www.readability.com/api/rest/v1/oauth/request_token/'
-        self.ACC_TOKEN = 'https://www.readability.com/api/rest/v1/oauth/access_token/'
+        base = 'https://www.readability.com'
+        self.AUTH_URL = '{}/api/rest/v1/oauth/authorize/'.format(base)
+        self.REQ_TOKEN = '{}/api/rest/v1/oauth/request_token/'.format(base)
+        self.ACC_TOKEN = '{}/api/rest/v1/oauth/access_token/'.format(base)
         self.consumer_key = settings.TH_READABILITY['consumer_key']
         self.consumer_secret = settings.TH_READABILITY['consumer_secret']
 
@@ -50,7 +56,8 @@ class ServiceReadability(ServicesMgr):
             token_key, token_secret = token.split('#TH#')
 
             client = ReaderClient(
-                self.consumer_key, self.consumer_secret, token_key, token_secret)
+                self.consumer_key, self.consumer_secret,
+                token_key, token_secret)
 
             bookmarks = client.get_bookmarks(
                 added_since=date_triggered).content
@@ -94,15 +101,17 @@ class ServiceReadability(ServicesMgr):
             bookmark_id = readability_instance.add_bookmark(url=data['link'])
 
             if trigger.tag is not None and len(trigger.tag) > 0:
-                readability_instance.add_tags_to_bookmark(
-                    bookmark_id, tags=(trigger.tag.lower()))
-
-            sentance = str('readability {} created item id {}').format(
-                data['link'], bookmark_id)
-            logger.debug(sentance)
+                try:
+                    readability_instance.add_tags_to_bookmark(
+                        bookmark_id, tags=(trigger.tag.lower()))
+                    sentence = str('readability {} created item id {}').format(
+                        data['link'], bookmark_id)
+                    logger.debug(sentence)
+                except Exception, e:
+                    logger.critical(e)
         else:
-            logger.critical(
-                "no token or link provided for trigger ID {} ".format(trigger_id))
+            sentence = "no token or link provided for trigger ID {} "
+            logger.critical(sentence.format(trigger_id))
 
     def auth(self, request):
         """
@@ -137,10 +146,10 @@ class ServiceReadability(ServicesMgr):
             us = UserService.objects.get(
                 user=request.user,
                 name=ServicesActivated.objects.get(name='ServiceReadability'))
-            # 2) Readability API require to use 4 parms consumer_key/secret + token_key/secret
-            # instead of usually get just the token from an access_token
-            # request. So we need to add a string seperator for later use to
-            # slpit on this one
+            # 2) Readability API require to use 4 parms consumer_key/secret +
+            # token_key/secret instead of usually get just the token
+            # from an access_token request. So we need to add a string
+            # seperator for later use to slpit on this one
             access_token = self.get_access_token(
                 request.session['oauth_token'],
                 request.session['oauth_token_secret'],
