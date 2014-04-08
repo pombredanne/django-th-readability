@@ -107,7 +107,7 @@ class ServiceReadability(ServicesMgr):
                     sentence = str('readability {} created item id {}').format(
                         data['link'], bookmark_id)
                     logger.debug(sentence)
-                except Exception, e:
+                except Exception as e:
                     logger.critical(e)
         else:
             sentence = "no token or link provided for trigger ID {} "
