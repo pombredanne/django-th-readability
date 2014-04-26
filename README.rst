@@ -2,7 +2,7 @@
 Readability Connector
 =====================
 
-This connecttor provides an access to your Readability account from Trigger Happy
+From Trigger Happy, this connector provides an access to your Readability account
 
 Requirements :
 ==============
