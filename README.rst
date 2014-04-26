@@ -1,8 +1,8 @@
-==========================================
-Django Trigger Happy : Readability Service
-==========================================
+=====================
+Readability Connector
+=====================
 
-This service provides an access to your Readability account from Trigger Happy
+This connecttor provides an access to your Readability account from Trigger Happy
 
 Requirements :
 ==============
@@ -18,7 +18,7 @@ to get the project, from your virtualenv, do :
 
     pip install django-th-readability
     
-then
+then do
 
 .. code:: python
 
@@ -46,10 +46,11 @@ add the module th_rss to INSTALLED_APPS
         'th_readability',
     )    
 
+
 TH_SERVICES 
 ~~~~~~~~~~~
 
-TH_SERVICES is a list of the services use by Trigger Happy
+TH_SERVICES is a list of the services used by Trigger Happy
 
 .. code:: python
 
