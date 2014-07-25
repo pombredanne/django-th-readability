@@ -7,7 +7,8 @@ From Trigger Happy, this connector provides an access to your Readability accoun
 Requirements :
 ==============
 * django_th: 0.9.0
-* readability-api: 0.2.2
+* readability-api: 0.2.4
+* Python < 3.x due to oauth2 required by readability-api
 
 
 Installation:

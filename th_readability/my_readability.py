@@ -1,10 +1,17 @@
 # -*- coding: utf-8 -*-
 # oauth and url stuff
-import oauthlib as oauth
-import urllib
-from urllib.parse import urlparse
+# python 2
+import sys
+if sys.version_info.major == 2:
+    import oauth2 as oauth
+    import urlparse
+# python 3
+elif sys.version_info.major == 3:
+    import requests_oauthlib as oauth
+    from urllib.parse import urlparse
+
 # readability API
-from readability_api import ReaderClient
+from readability import ReaderClient
 
 # django classes
 from django.conf import settings
