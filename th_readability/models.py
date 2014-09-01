@@ -14,3 +14,9 @@ class Readability(Services):
 
     class Meta:
         app_label = 'django_th'
+
+    def __unicode__(self):
+        return "%s" % (self.name)
+
+    def show(self):
+        return "My Readability %s" % (self.name)
