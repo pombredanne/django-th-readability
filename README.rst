@@ -6,7 +6,7 @@ From Trigger Happy, this connector provides an access to your Readability accoun
 
 Requirements :
 ==============
-* django_th: 0.9.0
+* django_th >= 0.9.0
 * readability-api: 0.2.4
 * Python < 3.x due to oauth2 required by readability-api
 
@@ -60,6 +60,7 @@ TH_SERVICES is a list of the services used by Trigger Happy
         'th_readability.my_readability.ServiceReadability',
     )
 
+
 TH_READABILITY
 ~~~~~~~~~~~~~~
 TH_READABILITY is the settings you will need to be able to add/read data in/from readability Service.
@@ -70,6 +71,7 @@ TH_READABILITY is the settings you will need to be able to add/read data in/from
         'consumer_key': 'abcdefghijklmnopqrstuvwxyz',
         'consumer_secret': 'abcdefghijklmnopqrstuvwxyz',
     }
+
 
 Setting up : Administration
 ===========================
