@@ -96,6 +96,7 @@ class ServiceReadability(ServicesMgr):
         """
             let's save the data
         """
+        status = False
         if token and 'link' in data and data['link'] is not None and len(data['link']) > 0:
             # get the data of this trigger
             trigger = Readability.objects.get(trigger_id=trigger_id)
@@ -114,13 +115,16 @@ class ServiceReadability(ServicesMgr):
                     sentence = str('readability {} created item id {}').format(
                         data['link'], bookmark_id)
                     logger.debug(sentence)
-                    return True
+                    status = True
                 except Exception as e:
                     logger.critical(e)
-                    return False
+                    status = False
         else:
             sentence = "no token or link provided for trigger ID {} "
             logger.critical(sentence.format(trigger_id))
+            status = False
+
+        return status
 
     def auth(self, request):
         """
