@@ -56,6 +56,13 @@ class ServiceReadability(ServicesMgr):
     def process_data(self, token, trigger_id, date_triggered):
         """
             get the data from the service
+
+            :param trigger_id: trigger ID to process
+            :param date_triggered: the date of the last trigger
+            :type trigger_id: int
+            :type date_triggered: datetime
+            :return: list of data found from the date_triggered filter
+            :rtype: list
         """
         data = []
 
@@ -95,6 +102,13 @@ class ServiceReadability(ServicesMgr):
     def save_data(self, token, trigger_id, **data):
         """
             let's save the data
+
+            :param trigger_id: trigger ID from which to save data
+            :param **data: the data to check to be used and save
+            :type trigger_id: int
+            :type **data:  dict
+            :return: the status of the save statement
+            :rtype: boolean
         """
         status = False
         if token and 'link' in data and data['link'] is not None and len(data['link']) > 0:
