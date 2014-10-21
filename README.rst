@@ -6,7 +6,7 @@ From Trigger Happy, this connector provides an access to your Readability accoun
 
 Requirements :
 ==============
-* `django_th <https://github.com/foxmask/django-th>`_ == 0.9.0
+* `django_th <https://github.com/foxmask/django-th>`_ >= 0.9.1
 * `readability-api <https://pypi.python.org/pypi/readability-api>`_  == 0.2.4
 * Python < 3.x due to oauth2 required by readability-api
 
