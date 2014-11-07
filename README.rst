@@ -69,10 +69,7 @@ To be able to use readability :
 * you will need to `grad the readability keys <https://readability.com/developers/api>`_
 * create a new application at readability website, then
 
-|ImageLink|_
-
-.. |ImageLink| image:: http://foxmask.info/public/trigger_happy/readability_account_settings.png 
-
+.. image:: http://foxmask.info/public/trigger_happy/readability_account_settings.png 
 
 * copy the "keys & secret" of your application to the settings.py
  
