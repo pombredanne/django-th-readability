@@ -62,8 +62,19 @@ TH_SERVICES is a list of the services used by Trigger Happy
 
 TH_READABILITY
 ~~~~~~~~~~~~~~
-TH_READABILITY is the settings you will need to be able to add/read data in/from readability Service.
+TH_READABILITY is the settings you will need, to be able to add/read data in/from readability Service.
 
+To be able to use readability :
+
+* you will need to (grad the readability keys)[https://readability.com/developers/api] 
+* create a new application at readability website
+
+|ImageLink|_
+
+.. |ImageLink| image:: http://foxmask.info/public/trigger_happy/readability_account_settings.png 
+
+* copy the "keys & secret" of your application to the settings.py
+ 
 .. code:: python
 
     TH_READABILITY = {
