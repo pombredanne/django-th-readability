@@ -73,6 +73,7 @@ To be able to use readability :
 
 .. |ImageLink| image:: http://foxmask.info/public/trigger_happy/readability_account_settings.png 
 
+
 * copy the "keys & secret" of your application to the settings.py
  
 .. code:: python
