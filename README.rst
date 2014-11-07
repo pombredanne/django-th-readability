@@ -66,8 +66,8 @@ TH_READABILITY is the settings you will need, to be able to add/read data in/fro
 
 To be able to use readability :
 
-* you will need to `grad the readability keys <https://readability.com/developers/api>_`
-* create a new application at readability website
+* you will need to `grad the readability keys <https://readability.com/developers/api>`_
+* create a new application at readability website, then
 
 |ImageLink|_
 
